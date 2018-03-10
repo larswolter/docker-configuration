@@ -92,7 +92,7 @@ fi
 chown 102:106 /data/prosody
 
 docker run -d \
-  --name prosody \
+ --name prosody \
   -v nginx_certs:/etc/prosody/certs:ro \
   -v /data/prosody:/data \
   -v /data/configs/prosody.cfg.lua:/etc/prosody/prosody.cfg.lua \
@@ -101,6 +101,7 @@ docker run -d \
   -e LETSENCRYPT_HOST=$DOMAINNAME \
   -e LETSENCRYPT_EMAIL=$EMAIL \
   -p 5222:5222 \
+  -p 5269:5269 \
   prosody/prosody
 
 
@@ -113,3 +114,4 @@ docker run -d \
 #  -e MONGO_URL=mongodb://mongodb:27017 \
 #  -e ROOT_URL=https://app.$DOMAINNAME \
 #  lwo/meteor-builder  
+
