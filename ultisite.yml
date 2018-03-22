@@ -1,0 +1,28 @@
+version: "2"
+services:
+  ultisite:
+    build:
+      image: "ultisite:${COMMIT}"
+      context: "https://github.com/larswolter/ultisite#${COMMIT}"
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/meteor
+      ROOT_URL: "https://${ULTISITE_DOMAIN}"
+      VIRTUAL_HOST: "${ULTISITE_DOMAIN}"
+      LETSENCRYPT_HOST: "${ULTISITE_DOMAIN}"
+    depends_on:
+      - mongodb
+    networks:
+      - mongodb
+      - nginx_ultisite
+
+  mongodb:
+    image: "mongo:3.6"
+    networks:
+      - mongodb
+  nginx:
+    networks:
+      - nginx_ultisite
+
+networks:
+  - mongodb
+  - nginx_ultisite
