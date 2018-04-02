@@ -73,8 +73,12 @@ daemonize = false;
 authentication = "internal_hashed";
 storage = "sql";
 sql = {
-  driver ="SQLite3";
-  database="prosody.sqlite";
+  driver ="MySQL";
+  database = "prosody";
+  host = "mariadb";
+  port = 3306;
+  username = "prosody";
+  password = "prosody";
 }
 sql_manage_tables = true;
 

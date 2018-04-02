@@ -16,12 +16,15 @@ services:
     networks:
       - nginx_prosody
       - nginx_portainer
+      - nginx_ultisite
+      - nginx_nextcloud
 
   nginx-gen:
-    image: jwilder/docker-gen
+    build:
+      context: "."
+      dockerfile: nginx-gen.dockerfile
     container_name: nginx-gen
     volumes:
-      - /data/configs/nginx.tmpl:/etc/docker-gen/templates/nginx.tmpl:ro
       - /var/run/docker.sock:/tmp/docker.sock:ro 
     volumes_from: 
       - nginx 
@@ -31,20 +34,13 @@ services:
       - nginx
     command: -notify-sighup nginx -watch -wait 5s:30s /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
 
-#  -notify-sighup nginx -watch -wait 5s:30s \
-#  /etc/docker-gen/templates/nginx.tmpl \
-#  /etc/nginx/conf.d/default.conf
-
-
   nginx-letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: nginx-letsencrypt
     volumes:
-      - nginx_conf:/etc/nginx/conf.d
-      - nginx_vhost:/etc/nginx/vhost.d
-      - nginx_html:/usr/share/nginx/html
-      - nginx_certs:/etc/nginx/certs
       - /var/run/docker.sock:/var/run/docker.sock:ro  
+    volumes_from: 
+      - nginx 
     depends_on:
       - nginx-gen
     environment:
@@ -68,32 +64,103 @@ services:
       - nginx_portainer
 
   prosody:
-    image: prosody/prosody
+    build:
+      context: "."
+      dockerfile: prosody.dockerfile
+      args:
+        DOMAINNAME:
     container_name: prosody
     ports:
       - 5222:5222
       - 5269:5269
     volumes:
       - nginx_certs:/etc/prosody/certs:ro
-      - /data/prosody:/data
-      - /data/configs/prosody.cfg.lua:/etc/prosody/prosody.cfg.lua
     environment:
       VIRTUAL_HOST: "${DOMAINNAME}"
       VIRTUAL_PORT: "5280"
       LETSENCRYPT_HOST: "${DOMAINNAME}"
       LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
     depends_on:
+      - mariadb
       - nginx-gen
       - nginx-letsencrypt
     networks:
       - nginx_prosody
+      - mariadb_prosody
+
+  ultisite:
+    restart: always
+    image: "ultisite"
+    build:
+      context: "https://github.com/larswolter/ultisite.git"
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/meteor
+      ROOT_URL: "https://${ULTISITE_DOMAIN}"
+      VIRTUAL_HOST: "${ULTISITE_DOMAIN}"
+      LETSENCRYPT_HOST: "${ULTISITE_DOMAIN}"
+    depends_on:
+      - nginx-gen
+      - nginx-letsencrypt
+      - mongodb
+    networks:
+      - mongodb
+      - nginx_ultisite
+  mongodb:
+    image: "mongo:3.6"
+    restart: always
+    volumes:
+      - mongodb:/data/db
+    networks:
+      - mongodb
+
+  nextcloud:
+    image: nextcloud:fpm-alpine
+    restart: always
+    ports:
+      - 8080:80
+    depends_on:
+      - nginx-gen
+      - nginx-letsencrypt
+      - mariadb
+    volumes:
+      - nextcloud:/var/www/html
+    environment:
+      - MYSQL_PASSWORD=nextcloud
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=mariadb
+    networks:
+      - mariadb_nextcloud
+      - nginx_nextcloud
+  mariadb:      
+    build: 
+      context: "."
+      dockerfile: mariadb.dockerfile
+    restart: always
+    volumes:
+      - mariadb:/var/lib/mysql
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: "1"
+    networks:
+      - mariadb_nextcloud
+      - nginx_nextcloud
+      - mariadb_prosody
+
 
 networks:
-  - nginx_prosody
-  - nginx_portainer
+  mongodb:
+  mariadb_nextcloud:
+  mariadb_prosody:
+  nginx_ultisite:
+  nginx_nextcloud:
+  nginx_prosody:
+  nginx_portainer:
 
 volumes:
   portainer_data:
+  mongodb:
+  mariadb:
+  nextcloud:
   nginx_certs:
   nginx_conf:
   nginx_vhost:
