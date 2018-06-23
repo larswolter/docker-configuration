@@ -225,12 +225,21 @@ networks:
 
 volumes:
   portainer_data:
+    external: true
   mongodb:
+    external: true
   mariadb:
+    external: true
   nextcloud:
+    external: true
   nginx_certs:
+    external: true
   nginx_conf:
+    external: true
   nginx_vhost:
+    external: true
   nginx_html:
+    external: true
   piwigo:
+    external: true
 
