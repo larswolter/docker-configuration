@@ -59,22 +59,6 @@ services:
     networks:
       - nginx_proxy
 
-  icinga:
-    container_name: icinga
-    image: jordan/icinga2
-    hostname: "icinga.${DOMAINNAME}"
-    environment:
-      VIRTUAL_HOST: "icinga.${DOMAINNAME}"
-      LETSENCRYPT_HOST: "icinga.${DOMAINNAME}"
-      LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
-    depends_on:
-      - nginx-gen
-      - nginx-letsencrypt
-    networks:
-      - nginx_icinga
-
-
-# run portainer for administration
   portainer:
     image: portainer/portainer
     container_name: portainer
@@ -90,6 +74,28 @@ services:
       - nginx-letsencrypt
     networks:
       - nginx_portainer
+
+  icinga:
+    image: jordan/icinga2
+    container_name: icinga
+    hostname: "icinga.${DOMAINNAME}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      VIRTUAL_HOST: "icinga.${DOMAINNAME}"
+      LETSENCRYPT_HOST: "icinga.${DOMAINNAME}"
+      LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
+      DEFAULT_MYSQL_HOST: "mariadb"
+      DEFAULT_MYSQL_USER: "icinga"
+      DEFAULT_MYSQL_PASS: "icinga"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+    depends_on:
+      - nginx-gen
+      - nginx-letsencrypt
+      - mariadb
+    networks:
+      - mariadb_icinga
+      - nginx_icinga
 
   prosody:
     build:
@@ -134,9 +140,10 @@ services:
     volumes:
       - mariadb:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: "6919af0989ef"
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
     networks:
       - mariadb_nextcloud
+      - mariadb_icinga
       - nginx_nextcloud
       - mariadb_prosody
       - mariadb_piwigo
@@ -207,13 +214,14 @@ networks:
   mariadb_nextcloud:
   mariadb_prosody:
   mariadb_piwigo:
+  mariadb_icinga:
   nginx_piwigo:
   nginx_ultisite:
   nginx_nextcloud:
   nginx_prosody:
   nginx_portainer:
-  nginx_icinga:
   nginx_proxy:
+  nginx_icinga:
 
 volumes:
   portainer_data:
