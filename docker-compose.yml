@@ -170,15 +170,15 @@ services:
       - nginx_ultisite
 
   nextcloud:
-    image: nextcloud:fpm-alpine
+    image: nextcloud:apache
     container_name: nextcloud
     restart: always
+    volumes:
+      - nextcloud:/var/www/html/config
     depends_on:
       - nginx-gen
       - nginx-letsencrypt
       - mariadb
-    volumes:
-      - nextcloud:/var/www/html
     environment:
       - MYSQL_PASSWORD=nextcloud
       - MYSQL_DATABASE=nextcloud
@@ -226,11 +226,11 @@ networks:
 volumes:
   portainer_data:
     external: true
+  nextcloud:
+    external: true
   mongodb:
     external: true
   mariadb:
-    external: true
-  nextcloud:
     external: true
   nginx_certs:
     external: true
