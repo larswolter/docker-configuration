@@ -187,6 +187,19 @@ services:
     networks:
       - mariadb_nextcloud
       - nginx_nextcloud
+  
+  borgbackup:
+    container_name: borgbackup
+    build: 
+      context: "."
+      dockerfile: borg-backup.dockerfile
+    restart: always
+    volumes:
+      - mongodb:/backup/mongodb
+    environment:
+      - BORG_REPO=/dev/null
+      - BORG_PASSPHRASE=geheim
+
 
   piwigo:
     image: linuxserver/piwigo
