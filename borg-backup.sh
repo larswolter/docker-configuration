@@ -1,49 +1,42 @@
 #!/bin/sh
 
-# Setting this, so the repo does not need to be given on the commandline:
-# export BORG_REPO=ssh://username@example.com:2022/~/backup/main
-
-# Setting this, so you won't be asked for your repository passphrase:
-# export BORG_PASSPHRASE='XYZl0ngandsecurepa_55_phrasea&&123'
-
-# or this to ask an external program to supply the passphrase:
-# export BORG_PASSCOMMAND='pass show backup'
-
+# based on borgbackup.readthedocs.io 
 # some helpers and error handling:
 info() { printf "\n%s %s\n\n" "$( date )" "$*" >&2; }
 trap 'echo $( date ) Backup interrupted >&2; exit 2' INT TERM
 
 info "Starting backup to $BORG_REPO"
 
-# Backup the most important directories into an archive named after
-# the machine this script is currently running on:
+# Backup the backup folder to an archive named by the date
+now=$(date +'%Y_%m_%d')
+
+info "Starting backup to $BORG_REPO $now"
 
 borg create                         \
     --verbose                       \
     --filter AME                    \
     --list                          \
+    --remote-path=borg1             \
     --stats                         \
     --show-rc                       \
     --compression lz4               \
-                                    \
-    ::'{now}'            \
+    ${BORG_REPO}::${now}            \
     /backup                         \
 
 backup_exit=$?
 
 info "Pruning repository"
 
-# Use the `prune` subcommand to maintain 7 daily, 4 weekly and 6 monthly
-# archives of THIS machine. The '{hostname}-' prefix is very important to
-# limit prune's operation to this machine's archives and not apply to
-# other machines' archives also:
+# Use the `prune` subcommand to maintain 7 daily, 4 weekly and 3 monthly
 
 borg prune                          \
     --list                          \
+    --remote-path=borg1             \
     --show-rc                       \
     --keep-daily    7               \
     --keep-weekly   4               \
     --keep-monthly  3               \
+    ${BORG_REPO}            \
 
 prune_exit=$?
 
