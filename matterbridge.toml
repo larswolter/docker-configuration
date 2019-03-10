@@ -1,0 +1,26 @@
+[xmpp.myxmpp]
+Server="<DOMAINNAME>:5222"
+#Jid your userid
+Jid="<XMPP_USER>"
+Password="<XMPP_PASS>"
+Muc="conference.<DOMAINNAME>"
+Nick="xmppbot"
+RemoteNickFormat="[{PROTOCOL}] <{NICK}> "
+
+[telegram.mytelegram]
+#See https://core.telegram.org/bots#6-botfather 
+#and https://www.linkedin.com/pulse/telegram-bots-beginners-marco-frau
+Token="<TELEGRAM_TOKEN>"
+RemoteNickFormat="[{PROTOCOL}] <{NICK}> 
+
+[[gateway]]
+name="<CHANNEL>"
+enable=true
+
+[[gateway.inout]]
+account="xmpp.myxmpp"
+channel="<CHANNEL>"
+
+[[gateway.inout]]
+account="telegram.mytelegram"
+channel="<TELEGRAM_CHANNEL>"

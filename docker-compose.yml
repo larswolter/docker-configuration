@@ -122,6 +122,18 @@ services:
       - nginx_prosody
       - mariadb_prosody
 
+  matterbridge:
+    build:
+      context: "."
+      dockerfile: matterbridge.dockerfile
+      args:
+        DOMAINNAME:
+        CHANNEL:
+        XMPP_USER:
+        XMPP_PASS:
+        TELEGRAM_TOKEN: 
+        TELEGRAM_CHANNEL: 
+
   mongodb:
     image: "mongo:3.6"
     container_name: mongodb
