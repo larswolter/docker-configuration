@@ -195,11 +195,14 @@ services:
       dockerfile: borg-backup.dockerfile
     restart: always
     volumes:
+      - borgbackup:/borg
+      - /root/.ssh:/root/.ssh:ro
       - mongodb:/backup/mongodb
       - portainer_data:/backup/portainer
       - prosody_data:/backup/prosody
     environment:
-      - BORG_REPO=/dev/null
+      - BORG_BASE_DIR=/borg
+      - BORG_REPO=user:password@host:folder
       - BORG_PASSPHRASE=geheim
 
 
@@ -256,5 +259,7 @@ volumes:
   nginx_html:
     external: true
   piwigo:
+    external: true
+  borgbackup:
     external: true
 
