@@ -196,6 +196,8 @@ services:
     restart: always
     volumes:
       - mongodb:/backup/mongodb
+      - portainer_data:/backup/portainer
+      - prosody_data:/backup/prosody
     environment:
       - BORG_REPO=/dev/null
       - BORG_PASSPHRASE=geheim

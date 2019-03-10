@@ -88,7 +88,6 @@ log = {
 pidfile = "prosody.pid";
 consider_bosh_secure = true;
 
-
 VirtualHost "localhost"
 
 VirtualHost "<DOMAINNAME>"
@@ -97,4 +96,7 @@ ssl = {
     certificate = "/etc/prosody/certs/<DOMAINNAME>.crt";
 }
 
+Component "conference.<DOMAINNAME>" "muc";
+  name = "Conference Rooms";
+  restrict_room_creation = "admin";
               
