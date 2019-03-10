@@ -199,7 +199,6 @@ services:
       - /root/.ssh:/root/.ssh:ro
       - mongodb:/backup/mongodb
       - portainer_data:/backup/portainer
-      - prosody_data:/backup/prosody
     environment:
       - BORG_BASE_DIR=/borg
       - BORG_REPO=user:password@host:folder
