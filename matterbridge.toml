@@ -11,7 +11,7 @@
 [telegram]
     [telegram.mytelegram]
     Token="<TELEGRAM_TOKEN>"
-    RemoteNickFormat="[{PROTOCOL}] <{NICK}> 
+    RemoteNickFormat="[{PROTOCOL}] <{NICK}> "
 
 [[gateway]]
     name="<CHANNEL>"

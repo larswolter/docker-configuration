@@ -119,8 +119,12 @@ services:
       - nginx-gen
       - nginx-letsencrypt
     networks:
-      - nginx_prosody
-      - mariadb_prosody
+      nginx_prosody:
+      mariadb_prosody:
+      prosody_matterbridge:
+        aliases:
+          - "schnuppmann.de"
+          - "conference.schnuppmann.de"
 
   matterbridge:
     build:
@@ -133,6 +137,8 @@ services:
         XMPP_PASS:
         TELEGRAM_TOKEN: 
         TELEGRAM_CHANNEL: 
+    networks:
+      - prosody_matterbridge
 
   mongodb:
     image: "mongo:3.6"
@@ -251,6 +257,7 @@ networks:
   nginx_portainer:
   nginx_proxy:
   nginx_icinga:
+  prosody_matterbridge:
 
 volumes:
   portainer_data:
