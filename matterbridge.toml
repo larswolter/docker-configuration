@@ -1,26 +1,27 @@
 [xmpp]
-    [xmpp.myxmpp]
+    [xmpp.main]
     Server="<DOMAINNAME>:5222"
     #Jid your userid
     Jid="<XMPP_USER>"
     Password="<XMPP_PASS>"
     Muc="conference.<DOMAINNAME>"
-    Nick="xmppbot"
-    RemoteNickFormat="[{PROTOCOL}] <{NICK}> "
+    Nick="ChatBridge"
+    RemoteNickFormat="[{NICK}] "
 
 [telegram]
-    [telegram.mytelegram]
+    [telegram.main]
     Token="<TELEGRAM_TOKEN>"
-    RemoteNickFormat="[{PROTOCOL}] <{NICK}> "
+    RemoteNickFormat="[{NICK}] "
+    MessageFormat="HTMLNick"
 
 [[gateway]]
-    name="<CHANNEL>"
+    name="gateway1"
     enable=true
 
     [[gateway.inout]]
-    account="xmpp.myxmpp"
+    account="xmpp.main"
     channel="<CHANNEL>"
 
     [[gateway.inout]]
-    account="telegram.mytelegram"
+    account="telegram.main"
     channel="<TELEGRAM_CHANNEL>"
