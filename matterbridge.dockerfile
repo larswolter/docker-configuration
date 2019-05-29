@@ -1,4 +1,4 @@
-FROM 42wim/matterbridge
+FROM 42wim/matterbridge:1.14.0-rc1
 
 ARG DOMAINNAME
 ARG CHANNEL

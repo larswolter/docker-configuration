@@ -137,6 +137,7 @@ services:
         XMPP_PASS:
         TELEGRAM_TOKEN: 
         TELEGRAM_CHANNEL: 
+    container_name: matterbridge
     networks:
       - prosody_matterbridge
 
