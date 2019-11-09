@@ -18,6 +18,7 @@ services:
       - nginx_prosody
       - nginx_portainer
       - nginx_ultisite
+      - nginx_toolws
       - nginx_nextcloud
       - nginx_icinga
       - nginx_piwigo
@@ -41,6 +42,7 @@ services:
       - nginx_prosody
       - nginx_portainer
       - nginx_ultisite
+      - nginx_toolws
       - nginx_nextcloud
       - nginx_icinga
       - nginx_piwigo
@@ -188,6 +190,27 @@ services:
       - mongodb
       - nginx_ultisite
 
+  toolws:
+    restart: always
+    image: "toolws"
+    container_name: toolws
+    build:
+      context: "https://github.com/larswolter/toolws.git"
+    environment:
+      MONGO_URL: mongodb://mongodb:27017/toolws
+      ROOT_URL: "https://${TOOLWS_DOMAIN}"
+      PORT: "8080"
+      VIRTUAL_HOST: "${TOOLWS_DOMAIN}"
+      VIRTUAL_PORT: "8080"
+      LETSENCRYPT_HOST: "${TOOLWS_DOMAIN}"
+    depends_on:
+      - nginx-gen
+      - nginx-letsencrypt
+      - mongodb
+    networks:
+      - mongodb
+      - nginx_toolws
+
   nextcloud:
     image: nextcloud:apache
     container_name: nextcloud
@@ -253,6 +276,7 @@ networks:
   mariadb_icinga:
   nginx_piwigo:
   nginx_ultisite:
+  nginx_toolws:
   nginx_nextcloud:
   nginx_prosody:
   nginx_portainer:
