@@ -21,7 +21,6 @@ services:
       - nginx_toolws
       - nginx_nextcloud
       - nginx_icinga
-      - nginx_piwigo
 
   nginx-gen:
     build:
@@ -45,10 +44,9 @@ services:
       - nginx_toolws
       - nginx_nextcloud
       - nginx_icinga
-      - nginx_piwigo
 
   nginx-letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion
+    image: jrcs/letsencrypt-nginx-proxy-companion:latest
     container_name: nginx-letsencrypt
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro  
@@ -58,6 +56,7 @@ services:
       - nginx-gen
     environment:
       ACME_CA_URI: https://acme-staging.api.letsencrypt.org/directory
+      NGINX_DOCKER_GEN_CONTAINER: nginx-gen
     networks:
       - nginx_proxy
 
@@ -167,7 +166,6 @@ services:
       - mariadb_icinga
       - nginx_nextcloud
       - mariadb_prosody
-      - mariadb_piwigo
 
   ultisite:
     restart: always
@@ -247,34 +245,11 @@ services:
       - BORG_PASSPHRASE=geheim
 
 
-  piwigo:
-    image: linuxserver/piwigo
-    container_name: piwigo
-    restart: always
-    depends_on:
-      - nginx-gen
-      - nginx-letsencrypt
-      - mariadb
-    volumes:
-      - /etc/localtime:/etc/localtime:ro
-      - piwigo:/config
-    environment:
-      TZ: Europe/Berlin
-      VIRTUAL_HOST: "gallery.${DOMAINNAME}"
-      VIRTUAL_PORT: "80"
-      LETSENCRYPT_HOST: "gallery.${DOMAINNAME}"
-      LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
-    networks:
-      - mariadb_piwigo
-      - nginx_piwigo
-
 networks:
   mongodb:
   mariadb_nextcloud:
   mariadb_prosody:
-  mariadb_piwigo:
   mariadb_icinga:
-  nginx_piwigo:
   nginx_ultisite:
   nginx_toolws:
   nginx_nextcloud:
@@ -300,8 +275,6 @@ volumes:
   nginx_vhost:
     external: true
   nginx_html:
-    external: true
-  piwigo:
     external: true
   borgbackup:
     external: true
