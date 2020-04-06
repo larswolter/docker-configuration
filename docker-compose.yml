@@ -227,6 +227,37 @@ services:
     networks:
       - mariadb_nextcloud
       - nginx_nextcloud
+
+  coturn:
+    build:
+      context: .
+      dockerfile: coturn.Dockerfile
+    restart: always
+    volumes:
+      - nginx_certs:/etc/coturn/certs:ro
+    ports:
+## STUN/TURN
+#      - "3478:3478"
+#      - "3478:3478/udp"
+#      - "3479:3479"
+#      - "3479:3479/udp"
+#      - "80:80"
+#      - "80:80/udp"
+## STUN/TURN SSL
+      - "5349:5349"
+      - "5349:5349/udp"
+#      - "5350:5350"
+#      - "5350:5350/udp"
+#      - "443:443"
+#      - "443:443/udp"
+# Relay Ports
+#      - "49152-65535:49152-65535"
+#      - "49152-65535:49152-65535/udp"
+    networks:
+      - mongodb
+    depends_on:
+      - mongodb
+
   
   borgbackup:
     container_name: borgbackup
@@ -237,8 +268,9 @@ services:
     volumes:
       - borgbackup:/borg
       - /root/.ssh:/root/.ssh:ro
-      - mongodb:/backup/mongodb
-      - portainer_data:/backup/portainer
+      - mongodb:/backup/mongodb:ro
+      - mariadb:/backup/mariadb:ro
+      - portainer_data:/backup/portainer:ro
     environment:
       - BORG_BASE_DIR=/borg
       - BORG_REPO=user:password@host:folder
