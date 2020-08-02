@@ -227,6 +227,18 @@ services:
     networks:
       - mariadb_nextcloud
       - nginx_nextcloud
+    
+  collabora:
+    image: collabora/code
+    container_name: collabora
+    restart: always
+  depends_on:
+    - nextcloud
+  environment:
+    - domain=nextcloud
+  networks:
+    - nginx_nextcloud
+    
 
   coturn:
     build:
