@@ -18,6 +18,7 @@ services:
       - nginx_prosody
       - nginx_portainer
       - nginx_ultisite
+      - nginx_weather
       - nginx_toolws
       - nginx_nextcloud
       - nginx_icinga
@@ -42,14 +43,16 @@ services:
       - nginx_portainer
       - nginx_ultisite
       - nginx_toolws
+      - nginx_weather
       - nginx_nextcloud
       - nginx_icinga
 
   nginx-letsencrypt:
-    image: jrcs/letsencrypt-nginx-proxy-companion:latest
+    image: nginxproxy/acme-companion:latest
     container_name: nginx-letsencrypt
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro  
+      - acme:/etc/acme.sh
     volumes_from: 
       - nginx 
     depends_on:
@@ -127,21 +130,6 @@ services:
           - "schnuppmann.de"
           - "conference.schnuppmann.de"
 
-  matterbridge:
-    build:
-      context: "."
-      dockerfile: matterbridge.dockerfile
-      args:
-        DOMAINNAME:
-        CHANNEL:
-        XMPP_USER:
-        XMPP_PASS:
-        TELEGRAM_TOKEN: 
-        TELEGRAM_CHANNEL: 
-    container_name: matterbridge
-    networks:
-      - prosody_matterbridge
-
   mongodb:
     image: "mongo:3.6"
     container_name: mongodb
@@ -209,12 +197,34 @@ services:
       - mongodb
       - nginx_toolws
 
+  weather:
+    restart: always
+    image: "weather"
+    container_name: weather
+    build:
+      context: "https://github.com/larswolter/weatherapp.git#main"
+    environment:
+      HTTPS_METHOD: noredirect
+      MONGO_URL: mongodb://mongodb:27017/weather
+      ROOT_URL: "https://${WEATHER_DOMAIN}"
+      PORT: "8080"
+      VIRTUAL_HOST: "${WEATHER_DOMAIN}"
+      VIRTUAL_PORT: "8080"
+      LETSENCRYPT_HOST: "${WEATHER_DOMAIN}"
+    depends_on:
+      - nginx-gen
+      - nginx-letsencrypt
+      - mongodb
+    networks:
+      - mongodb
+      - nginx_weather
+
   nextcloud:
-    image: nextcloud:19-apache
+    image: nextcloud:20-apache
     container_name: nextcloud
     restart: always
     volumes:
-      - nextcloud:/var/www/html/config
+      - nextcloud:/var/www/html/config:cached
     depends_on:
       - nginx-gen
       - nginx-letsencrypt
@@ -228,37 +238,6 @@ services:
       - mariadb_nextcloud
       - nginx_nextcloud
     
-  coturn:
-    build:
-      context: .
-      dockerfile: coturn.Dockerfile
-    restart: always
-    volumes:
-      - nginx_certs:/etc/coturn/certs:ro
-    ports:
-## STUN/TURN
-#      - "3478:3478"
-#      - "3478:3478/udp"
-#      - "3479:3479"
-#      - "3479:3479/udp"
-#      - "80:80"
-#      - "80:80/udp"
-## STUN/TURN SSL
-      - "5349:5349"
-      - "5349:5349/udp"
-#      - "5350:5350"
-#      - "5350:5350/udp"
-#      - "443:443"
-#      - "443:443/udp"
-# Relay Ports
-#      - "49152-65535:49152-65535"
-#      - "49152-65535:49152-65535/udp"
-    networks:
-      - mongodb
-    depends_on:
-      - mongodb
-
-  
   borgbackup:
     container_name: borgbackup
     build: 
@@ -276,7 +255,6 @@ services:
       - BORG_REPO=user:password@host:folder
       - BORG_PASSPHRASE=geheim
 
-
 networks:
   mongodb:
   mariadb_nextcloud:
@@ -284,6 +262,7 @@ networks:
   mariadb_icinga:
   nginx_ultisite:
   nginx_toolws:
+  nginx_weather:
   nginx_nextcloud:
   nginx_prosody:
   nginx_portainer:
@@ -292,6 +271,7 @@ networks:
   prosody_matterbridge:
 
 volumes:
+  acme:
   portainer_data:
     external: true
   nextcloud:
