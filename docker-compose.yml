@@ -131,7 +131,7 @@ services:
           - "conference.schnuppmann.de"
 
   mongodb:
-    image: "mongo:3.6"
+    image: "mongo:4.2"
     container_name: mongodb
     restart: always
     volumes:
