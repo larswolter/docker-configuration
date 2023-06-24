@@ -16,12 +16,10 @@ services:
     networks:
       - nginx_proxy
       - nginx_prosody
-      - nginx_portainer
       - nginx_ultisite
       - nginx_weather
       - nginx_toolws
       - nginx_nextcloud
-      - nginx_icinga
 
   nginx-gen:
     build:
@@ -40,12 +38,10 @@ services:
     networks:
       - nginx_proxy
       - nginx_prosody
-      - nginx_portainer
       - nginx_ultisite
       - nginx_toolws
       - nginx_weather
       - nginx_nextcloud
-      - nginx_icinga
 
   nginx-letsencrypt:
     image: nginxproxy/acme-companion:latest
@@ -63,44 +59,6 @@ services:
     networks:
       - nginx_proxy
 
-  portainer:
-    image: portainer/portainer
-    container_name: portainer
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
-    environment:
-      VIRTUAL_HOST: "admin.${DOMAINNAME}"
-      LETSENCRYPT_HOST: "admin.${DOMAINNAME}"
-      LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
-    depends_on:
-      - nginx-gen
-      - nginx-letsencrypt
-    networks:
-      - nginx_portainer
-
-  icinga:
-    image: jordan/icinga2
-    container_name: icinga
-    hostname: "icinga.${DOMAINNAME}"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      VIRTUAL_HOST: "icinga.${DOMAINNAME}"
-      LETSENCRYPT_HOST: "icinga.${DOMAINNAME}"
-      LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
-      DEFAULT_MYSQL_HOST: "mariadb"
-      DEFAULT_MYSQL_USER: "icinga"
-      DEFAULT_MYSQL_PASS: "icinga"
-      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-    depends_on:
-      - nginx-gen
-      - nginx-letsencrypt
-      - mariadb
-    networks:
-      - mariadb_icinga
-      - nginx_icinga
-
   prosody:
     build:
       context: "."
@@ -109,8 +67,8 @@ services:
         DOMAINNAME:
     container_name: prosody
     ports:
-      - 5222:5222
-      - 5269:5269
+      - 0.0.0.0:5222:5222/tcp
+      - 0.0.0.0:5269:5269/tcp
     volumes:
       - nginx_certs:/etc/prosody/certs:ro
     environment:
@@ -125,10 +83,6 @@ services:
     networks:
       nginx_prosody:
       mariadb_prosody:
-      prosody_matterbridge:
-        aliases:
-          - "schnuppmann.de"
-          - "conference.schnuppmann.de"
 
   mongodb:
     image: "mongo:4.2"
@@ -220,7 +174,7 @@ services:
       - nginx_weather
 
   nextcloud:
-    image: nextcloud:20-apache
+    image: nextcloud:25-apache
     container_name: nextcloud
     restart: always
     volumes:
@@ -249,7 +203,6 @@ services:
       - /root/.ssh:/root/.ssh:ro
       - mongodb:/backup/mongodb:ro
       - mariadb:/backup/mariadb:ro
-      - portainer_data:/backup/portainer:ro
     environment:
       - BORG_BASE_DIR=/borg
       - BORG_REPO=user:password@host:folder
@@ -265,15 +218,11 @@ networks:
   nginx_weather:
   nginx_nextcloud:
   nginx_prosody:
-  nginx_portainer:
   nginx_proxy:
-  nginx_icinga:
   prosody_matterbridge:
 
 volumes:
   acme:
-  portainer_data:
-    external: true
   nextcloud:
     external: true
   mongodb:
