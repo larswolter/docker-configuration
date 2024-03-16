@@ -111,10 +111,10 @@ services:
 
   ultisite:
     restart: always
-    image: "ultisite"
-    container_name: ultisite
-    build:
-      context: "https://github.com/larswolter/ultisite.git"
+    image: "ultisite:2023-11-15"
+    #container_name: ultisite
+    #build:
+    #  context: "https://github.com/larswolter/ultisite.git"
     environment:
       MONGO_URL: mongodb://mongodb:27017/meteor
       ROOT_URL: "https://${ULTISITE_DOMAIN}"
@@ -153,10 +153,10 @@ services:
 
   weather:
     restart: always
-    image: "weather"
+    image: "weatherapp:2023-10-10"
     container_name: weather
-    build:
-      context: "https://github.com/larswolter/weatherapp.git#main"
+    #build:
+    #  context: "https://github.com/larswolter/weatherapp.git#main"
     environment:
       HTTPS_METHOD: noredirect
       MONGO_URL: mongodb://mongodb:27017/weather
@@ -174,7 +174,7 @@ services:
       - nginx_weather
 
   nextcloud:
-    image: nextcloud:25-apache
+    image: nextcloud:27-apache
     container_name: nextcloud
     restart: always
     volumes:
@@ -191,7 +191,7 @@ services:
     networks:
       - mariadb_nextcloud
       - nginx_nextcloud
-    
+
   borgbackup:
     container_name: borgbackup
     build: 
@@ -219,7 +219,6 @@ networks:
   nginx_nextcloud:
   nginx_prosody:
   nginx_proxy:
-  prosody_matterbridge:
 
 volumes:
   acme:

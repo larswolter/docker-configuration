@@ -23,6 +23,8 @@ modules_enabled = {
     "ping"; -- Replies to XMPP pings with pongs
     "pep"; -- Enables users to publish their mood, activity, playing music and more
     "register"; -- Allow users to register on this server using a client and change passwords
+    "mam";
+    "carbons";
 
   -- Admin interfaces
     "admin_adhoc"; -- Allows administration via an XMPP client that supports ad-hoc commands
