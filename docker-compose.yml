@@ -84,8 +84,22 @@ services:
       nginx_prosody:
       mariadb_prosody:
 
+  mosquitto:
+    image: eclipse-mosquitto
+    container_name: mosquitto
+    ports:
+      - 0.0.0.0:1883:1883/tcp
+      - 0.0.0.0:9001:9001/tcp
+    volumes:
+      - /home/lars/docker-configuration/mosquitto.passwd:/mosquitto/config/mosquitto.passwd:ro
+      - /home/lars/docker-configuration/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - /home/lars/docker-configuration/mosquitto.acl:/mosquitto/config/mosquitto.acl:ro
+      - nginx_certs:/mosquitto/certs:ro
+    network:
+      - nginx_weather
+
   mongodb:
-    image: "mongo:4.2"
+    image: "mongo:4.4"
     container_name: mongodb
     restart: always
     volumes:
@@ -111,7 +125,7 @@ services:
 
   ultisite:
     restart: always
-    image: "ultisite:2023-11-15"
+    image: "ultisite:20240407"
     #container_name: ultisite
     #build:
     #  context: "https://github.com/larswolter/ultisite.git"
@@ -153,7 +167,7 @@ services:
 
   weather:
     restart: always
-    image: "weatherapp:2023-10-10"
+    image: "weatherapp:20240526"
     container_name: weather
     #build:
     #  context: "https://github.com/larswolter/weatherapp.git#main"
