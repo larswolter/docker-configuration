@@ -87,6 +87,7 @@ services:
   mosquitto:
     image: eclipse-mosquitto
     container_name: mosquitto
+    user: "1000:1000"
     ports:
       - 0.0.0.0:1883:1883/tcp
       - 0.0.0.0:9001:9001/tcp
@@ -95,7 +96,7 @@ services:
       - /home/lars/docker-configuration/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - /home/lars/docker-configuration/mosquitto.acl:/mosquitto/config/mosquitto.acl:ro
       - nginx_certs:/mosquitto/certs:ro
-    network:
+    networks:
       - nginx_weather
 
   mongodb:
@@ -125,8 +126,8 @@ services:
 
   ultisite:
     restart: always
-    image: "ultisite:20240407"
-    #container_name: ultisite
+    image: "ultisite:20241017"
+    container_name: ultisite
     #build:
     #  context: "https://github.com/larswolter/ultisite.git"
     environment:
@@ -167,7 +168,7 @@ services:
 
   weather:
     restart: always
-    image: "weatherapp:20240526"
+    image: "weatherapp:20250408"
     container_name: weather
     #build:
     #  context: "https://github.com/larswolter/weatherapp.git#main"
@@ -188,7 +189,7 @@ services:
       - nginx_weather
 
   nextcloud:
-    image: nextcloud:27-apache
+    image: nextcloud:29-apache
     container_name: nextcloud
     restart: always
     volumes:
