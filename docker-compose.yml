@@ -16,6 +16,7 @@ services:
     networks:
       - nginx_proxy
       - nginx_prosody
+      - nginx_synapse
       - nginx_ultisite
       - nginx_weather
       - nginx_toolws
@@ -42,6 +43,7 @@ services:
       - nginx_toolws
       - nginx_weather
       - nginx_nextcloud
+      - nginx_synapse
 
   nginx-letsencrypt:
     image: nginxproxy/acme-companion:latest
@@ -83,6 +85,29 @@ services:
     networks:
       nginx_prosody:
       mariadb_prosody:
+  
+  synapse:
+    build:
+      context: "."
+      dockerfile: synapse.dockerfile
+      args:
+        DOMAINNAME: "${DOMAINNAME}"
+    container_name: synapse
+    environment:
+      SYNAPSE_CONFIG_PATH: /config/synapse.yaml
+      VIRTUAL_HOST: "${DOMAINNAME}"
+      VIRTUAL_PORT: "8448"
+      VIRTUAL_PATH: /_matrix/
+      LETSENCRYPT_HOST: "${DOMAINNAME}"
+      LETSENCRYPT_EMAIL: "${LETSENCRYPT_EMAIL}"
+    volumes:
+      - nginx_certs:/etc/synapse/certs:ro
+      - synapse_data:/data
+    depends_on:
+      - nginx-gen
+      - nginx-letsencrypt
+    networks:
+      - nginx_synapse
 
   mosquitto:
     image: eclipse-mosquitto
@@ -233,6 +258,7 @@ networks:
   nginx_weather:
   nginx_nextcloud:
   nginx_prosody:
+  nginx_synapse:
   nginx_proxy:
 
 volumes:
@@ -253,4 +279,5 @@ volumes:
     external: true
   borgbackup:
     external: true
-
+  synapse_data:
+    external: true
